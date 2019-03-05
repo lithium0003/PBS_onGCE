@@ -78,7 +78,7 @@ cat << EOM | gcloud compute ssh master --zone $zone --command 'cat >shutdown.sh'
 
 if [[ `curl "http://metadata.google.internal/computeMetadata/v1/instance/preempted" -H "Metadata-Flavor: Google"` == 'TRUE' ]]
 then
-	date >> /var/tmp/preempted
+	date >> /var/lib/misc/preempted
 fi
 EOM
 
@@ -104,34 +104,34 @@ chmod 440 /tmp/sudoers.new
 visudo -c -f /tmp/sudoers.new && cp /tmp/sudoers.new /etc/sudoers
 EOF
 )
-gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/tmp/preempted ]] && echo '$txt' >/tmp/setproxy.sh && chmod +x /tmp/setproxy.sh" || exit 1
-gcloud compute ssh $host --zone $zone --internal-ip --command '[[ ! -f /var/tmp/preempted ]] && sudo /tmp/setproxy.sh' || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/lib/misc/preempted ]] && echo '$txt' >/tmp/setproxy.sh && chmod +x /tmp/setproxy.sh" || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command '[[ ! -f /var/lib/misc/preempted ]] && sudo /tmp/setproxy.sh' || exit 1
 
-gcloud compute ssh $host --zone $zone --internal-ip --command '[[ ! -f /var/tmp/preempted ]] && sudo apt update && sudo apt upgrade -y' || exit 1
-gcloud compute ssh $host --zone $zone --internal-ip --command '[[ ! -f /var/tmp/preempted ]] && sudo apt install -y nfs-common libpam-systemd dbus' || exit 1
-gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/tmp/preempted ]] && echo 'master:/home /home nfs rw,hard,intr,exec,lookupcache=none 0 0' | sudo tee -a /etc/fstab" || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command '[[ ! -f /var/lib/misc/preempted ]] && sudo apt update && sudo apt upgrade -y' || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command '[[ ! -f /var/lib/misc/preempted ]] && sudo apt install -y nfs-common libpam-systemd dbus' || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/lib/misc/preempted ]] && echo 'master:/home /home nfs rw,hard,intr,exec,lookupcache=none 0 0' | sudo tee -a /etc/fstab" || exit 1
 gcloud compute ssh $host --zone $zone --internal-ip --command 'sudo reboot' &
 sleep 1
 kill $!
 sleep 30
 
-gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/tmp/preempted ]] && sudo useradd $user -s /bin/bash" || exit 1
-gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/tmp/preempted ]] && sudo gpasswd -a $user google-sudoers" || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/lib/misc/preempted ]] && sudo useradd $user -s /bin/bash" || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/lib/misc/preempted ]] && sudo gpasswd -a $user google-sudoers" || exit 1
 gcloud compute ssh $host --zone $zone --internal-ip --command 'sudo reboot'
 sleep 30
 
-gcloud compute ssh $host --zone $zone --internal-ip --command '[[ ! -f /var/tmp/preempted ]] && sudo apt install -y gcc gfortran make libtool libhwloc-dev libx11-dev libxt-dev libedit-dev libical-dev ncurses-dev perl postgresql-server-dev-all postgresql-contrib python-dev tcl-dev tk-dev swig libexpat-dev libssl-dev libxext-dev libxft-dev autoconf automake' || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command '[[ ! -f /var/lib/misc/preempted ]] && sudo apt install -y gcc gfortran make libtool libhwloc-dev libx11-dev libxt-dev libedit-dev libical-dev ncurses-dev perl postgresql-server-dev-all postgresql-contrib python-dev tcl-dev tk-dev swig libexpat-dev libssl-dev libxext-dev libxft-dev autoconf automake' || exit 1
 
-gcloud compute ssh $host --zone $zone --internal-ip --command '[[ ! -f /var/tmp/preempted ]] && cd pbspro-19.1.1 && sudo make install && sudo /opt/pbs/libexec/pbs_postinstall && sudo chmod 4755 /opt/pbs/sbin/pbs_iff /opt/pbs/sbin/pbs_rcp' || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command '[[ ! -f /var/lib/misc/preempted ]] && cd pbspro-19.1.1 && sudo make install && sudo /opt/pbs/libexec/pbs_postinstall && sudo chmod 4755 /opt/pbs/sbin/pbs_iff /opt/pbs/sbin/pbs_rcp' || exit 1
 
-gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/tmp/preempted ]] && sudo sed -i 's/PBS_SERVER=.*/PBS_SERVER=master/' /etc/pbs.conf" || exit 1
-gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/tmp/preempted ]] && sudo sed -i 's/PBS_START_SERVER=1/PBS_START_SERVER=0/' /etc/pbs.conf" || exit 1
-gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/tmp/preempted ]] && sudo sed -i 's/PBS_START_SCHED=1/PBS_START_SCHED=0/' /etc/pbs.conf" || exit 1
-gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/tmp/preempted ]] && sudo sed -i 's/PBS_START_MOM=0/PBS_START_MOM=1/' /etc/pbs.conf" || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/lib/misc/preempted ]] && sudo sed -i 's/PBS_SERVER=.*/PBS_SERVER=master/' /etc/pbs.conf" || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/lib/misc/preempted ]] && sudo sed -i 's/PBS_START_SERVER=1/PBS_START_SERVER=0/' /etc/pbs.conf" || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/lib/misc/preempted ]] && sudo sed -i 's/PBS_START_SCHED=1/PBS_START_SCHED=0/' /etc/pbs.conf" || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/lib/misc/preempted ]] && sudo sed -i 's/PBS_START_MOM=0/PBS_START_MOM=1/' /etc/pbs.conf" || exit 1
 sed_cmd='s/$clienthost.*/$clienthost master/'
-gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/tmp/preempted ]] && sudo sed -i '$sed_cmd' /var/spool/pbs/mom_priv/config" || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/lib/misc/preempted ]] && sudo sed -i '$sed_cmd' /var/spool/pbs/mom_priv/config" || exit 1
 gcloud compute ssh $host --zone $zone --internal-ip --command "echo '\$usecp *:/home/ /home/' | sudo tee -a /var/spool/pbs/mom_priv/config"
-gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/tmp/preempted ]]" || exit 1
+gcloud compute ssh $host --zone $zone --internal-ip --command "[[ ! -f /var/lib/misc/preempted ]]" || exit 1
 gcloud compute ssh $host --zone $zone --internal-ip --command 'sudo reboot'
 
 exit 0
