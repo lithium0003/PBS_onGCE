@@ -76,7 +76,7 @@ gcloud compute ssh master --zone $zone --command "sudo service squid restart"
 cat << EOM | gcloud compute ssh master --zone $zone --command 'cat >shutdown.sh' 
 #!/bin/bash
 
-if [[ `curl "http://metadata.google.internal/computeMetadata/v1/instance/preempted" -H "Metadata-Flavor: Google"` == TRUE ]]
+if [[ \$(curl "http://metadata.google.internal/computeMetadata/v1/instance/preempted" -H "Metadata-Flavor: Google") == TRUE ]]
 then
 	date >> /var/lib/misc/preempted
 fi
