@@ -12,6 +12,14 @@ cd PBS_onGCE
 ./master.sh
 ```
 Change parameters in header of script for your environments. 
+```bash
+zone=asia-northeast1-b
+user=username
+homedisk=home
+homesize='100GB'
+sshkey='(your ssh key)'
 
+num_compute=14
+```
 ## Requirements
 By default, total CPU counts of each region on GCE is limted up to 24. If you need more cores, you should request to grow the limitation.
