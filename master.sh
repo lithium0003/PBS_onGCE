@@ -18,7 +18,8 @@ fi
 gcloud compute instances create master --boot-disk-type pd-ssd --image-family debian-9 --image-project debian-cloud --disk name=$homedisk --machine-type n1-highcpu-8 --scopes default,compute-rw --zone $zone
 
 gcloud compute ssh master --zone $zone --command 'sudo apt update && sudo apt upgrade -y'
-gcloud compute ssh master --zone $zone --command 'sudo apt -y install nfs-kernel-server whois less libpam-systemd dbus'
+gcloud compute ssh master --zone $zone --command 'sudo apt -y install nfs-kernel-server whois libpam-systemd dbus'
+gcloud compute ssh master --zone $zone --command 'sudo apt -y install psmisc less gdb'
 cat /dev/zero | gcloud compute ssh master --zone $zone --command 'sudo reboot'
 sleep 30
 
