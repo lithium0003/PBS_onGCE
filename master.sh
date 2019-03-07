@@ -7,6 +7,8 @@ homesize='100GB'
 sshkey='ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKeT5lV60kIk2A3uwdPupRTlwFYqjteYwEubNc9+UtQRbUoqd41iyu5Pis8D5WI0Zxc/QNjlC8KgXiUyOp3Ect0= yubikey'
 
 num_compute=14
+### if use master node for compute, uncomment this line ###
+#use_master=1
 
 if gcloud compute disks list | grep $homedisk; then
 	disk_exists='ok'
@@ -51,12 +53,16 @@ if [ -z $disk_exists ]; then
 else
 	gcloud compute ssh master --zone $zone --command 'cd pbspro-19.1.1 && sudo make install && sudo /opt/pbs/libexec/pbs_postinstall && sudo chmod 4755 /opt/pbs/sbin/pbs_iff /opt/pbs/sbin/pbs_rcp'
 fi
-### if use master node for compute, uncomment this line ###
-#gcloud compute ssh master --zone $zone --command "sudo sed -i 's/PBS_START_MOM=0/PBS_START_MOM=1/' /etc/pbs.conf"
+if [[ -n $use_master ]]; then
+	gcloud compute ssh master --zone $zone --command "sudo sed -i 's/PBS_START_MOM=0/PBS_START_MOM=1/' /etc/pbs.conf"
+fi
 echo '$usecp *:/home/ /home/' | gcloud compute ssh master --zone $zone --command 'sudo tee -a /var/spool/pbs/mom_priv/config'
 gcloud compute ssh master --zone $zone --command 'sudo reboot'
 sleep 30
 
+if [[ -n $use_master ]]; then
+	gcloud compute ssh master --zone $zone --command 'sudo /opt/pbs/bin/qmgr -c "set node master Priority = -10"'
+fi
 gcloud compute ssh master --zone $zone --command 'sudo apt install -y squid3'
 gcloud compute ssh master --zone $zone --command "sudo sed -i 's:#\(http_access allow localnet\):\1:' /etc/squid/squid.conf"
 gcloud compute ssh master --zone $zone --command "sudo sed -i 's:#\(http_access deny to_localhost\):\1:' /etc/squid/squid.conf"
